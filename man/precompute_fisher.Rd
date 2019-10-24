@@ -4,20 +4,21 @@
 \alias{precompute_fisher}
 \title{precompute a data table with fisher p-values and odds ratios}
 \usage{
-precompute_fisher(universe_size, vals = seq(0, 20), rotate = FALSE)
+precompute_fisher(universe_size, a_vals = seq(0, universe_size),
+  b_vals = a_vals)
 }
 \arguments{
 \item{universe_size}{integer, large number}
 
-\item{vals}{vector of integer, values to consider in first three cells in the confusion matrix}
+\item{a_vals}{vector of integers, values to consider for sizes of set a}
 
-\item{rotate}{logical, set TRUE to obtain full table of combinations, leave FALSE
-to consider column "d" as the special column that holds constrained counts}
+\item{b_vals}{vector of integers, values to consider for szies of set b}
 }
 \value{
 data.table with columns (a,b,c,d) that describe entries in a contingency
 table and columns (p.value, odds.ratio) that capture output from fisher.test
 }
 \description{
-precompute a data table with fisher p-values and odds ratios
+Nomenclature: set a is compare against set b, the contingency matrix is
+composed of count_11, count_10, count_01, and count_00
 }

@@ -115,7 +115,7 @@ This strategy can in-principle provide performance gains when several tasks yiel
 In many cases, sets are rather small, so we can precompute results for some contingency tables that are bound to appear quite often. Here, let's compute results for tables for which three of the four entries are small.
 
 ```{r precomp.40, cache=TRUE}
-precomp.40 = precompute_fisher(length(all_items), vals=0:40)
+precomp.40 = precompute_fisher(length(all_items), 0:40)
 head(precomp.40, 3)
 ```
 

@@ -3,20 +3,27 @@
 
 #' precompute a data table with fisher p-values and odds ratios 
 #'
+#' Nomenclature: set a is compare against set b, the contingency matrix is
+#' composed of count_11, count_10, count_01, and count_00
+#'
 #' @param universe_size integer, large number
-#' @param vals vector of integer, values to consider in first three cells in the confusion matrix
-#' @param rotate logical, set TRUE to obtain full table of combinations, leave FALSE
-#' to consider column "d" as the special column that holds constrained counts
+#' @param a_vals vector of integers, values to consider for sizes of set a
+#' @param b_vals vector of integers, values to consider for szies of set b
 #' @export
 #'
 #' @return data.table with columns (a,b,c,d) that describe entries in a contingency
 #' table and columns (p.value, odds.ratio) that capture output from fisher.test
-precompute_fisher = function(universe_size, vals=seq(0, 20), rotate=FALSE) {
+precompute_fisher = function(universe_size, a_vals=seq(0, universe_size), b_vals=a_vals) {
 
   # prepare a table of all configurations
-  vals = unique(pmin(universe_size, pmax(vals, 0)))
-  configs = list(count_11=vals, count_10=vals, count_01=vals)
+  a_vals = unique(pmin(universe_size, pmax(a_vals, 0)))
+  b_vals = unique(pmin(universe_size, pmax(b_vals, 0)))
+  configs = list(count_11=seq(0, min(max(a_vals), max(b_vals))),
+                 count_10=a_vals,
+                 count_01=b_vals)
   configs = data.table(expand.grid(configs))
+  configs = configs[(count_11 + count_10) %in% a_vals, ]
+  configs = configs[(count_11 + count_01) %in% b_vals, ]
   configs$count_00 = universe_size - (configs$count_11 + configs$count_01 + configs$count_10)
   # consider only positive entries
   # also consider only when 10>01 (will symmetrize afterward)
@@ -30,33 +37,6 @@ precompute_fisher = function(universe_size, vals=seq(0, 20), rotate=FALSE) {
   other$count_10 = temp
   
   result = rbind(result, other)
-  if (rotate) {
-    result_1 = rotate_abcd(result)
-    result_2 = rotate_abcd(result_1)
-    result_3 = rotate_abcd(result_2)
-    result = rbind(result, result_1, result_2, result_3)
-  }
-  
   unique(result)[order(count_11, count_10, count_01, count_00)]
-}
-
-
-
-#' produce a new table with columns rotated.
-#'
-#' This creates configurations that are expected to have the same properties under
-#' fisher.test.
-#'
-#' @keywords internal
-#' @param x data table with columns a,b,c,d
-#'
-#' @return data table with same structure as x, but columns a,b,c,d rotated
-rotate_abcd = function(x) {
-  temp = x$count_11
-  x$count_11 = x$count_10
-  x$count_10 = x$count_01
-  x$count_01 = x$count_00
-  x$count_00= temp
-  x
 }
 

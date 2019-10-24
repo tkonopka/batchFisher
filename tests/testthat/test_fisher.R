@@ -54,7 +54,7 @@ test_that("batch calculation should return p.values and odds ratios", {
 
 test_that("batch calculation should use relevant precomputed values", {
   # fudge a precomputed matrix - this is a signal that those values will be used!
-  precomp = precompute_fisher(50, vals=seq(0, 4))
+  precomp = precompute_fisher(50, seq(0, 8))
   precomp$p.value = 2+seq_len(nrow(precomp))
 
   # define a matrix with a mixture of configurations that are in precomp
@@ -76,7 +76,7 @@ test_that("batch calculation should use relevant precomputed values", {
 test_that("batch calculation with and without precomputed values should be equivalnet", {
   counts = data.table(count_11=5, count_10=1:4, count_01=1:4, count_00 = 45-seq(2,8, by=2))
   result.0 = batch_fisher(counts)
-  precomp = precompute_fisher(50, vals=seq(0,6))
+  precomp = precompute_fisher(50, seq(0,6))
   result.1 = batch_fisher(counts, precomp)
   expect_equal(result.0$p.value, result.1$p.value)
 })
@@ -87,7 +87,7 @@ test_that("batch calculation should preserve labels", {
                     count_11=5, count_10=1:4, count_01=1:4, count_00 = 45-seq(2,8, by=2))
   result.0 = batch_fisher(data)
   expect_equal(colnames(result.0)[1], "a")
-  precomp = precompute_fisher(50, vals=seq(0,6))
+  precomp = precompute_fisher(50, seq(0,6))
   result.1 = batch_fisher(data, precomp)
   expect_equal(colnames(result.1)[1], "a")
 })
