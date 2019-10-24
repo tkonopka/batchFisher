@@ -1,0 +1,13 @@
+## ignoring temporary files
+*~
+*aux
+*bbl
+*log
+*out
+*pdf
+*html
+
+## ignoring auxiliary files for vignette 
+vignettes/figure/
+vignettes/cache/
+

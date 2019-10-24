@@ -1,0 +1,40 @@
+/** styles for plotting in batchFisher vignette **/
+
+
+par {
+  mar: 4 4 1 1;
+  mgp: 2.4 0.5 0.2;
+  ps: 14;
+}
+plot {
+  type: n;
+  xlab: ;
+  ylab: ;
+  frame: FALSE;
+  axes: FALSE;
+}
+axis {
+  las: 1;
+  tck: -0.015;
+  col: #666666;
+  col.axis: #666666;
+  cex.axis: 0.85;
+}
+colors {
+  simple: #dd0000;
+  batch: #dd8800;
+  precomp: #0033dd;
+}
+lines {
+  lwd: 2;
+}
+legend {
+  bty: n;
+  lwd: 2;
+}
+mtext.ylab {
+  col: #000000;
+  line: 2.5;
+}
+
+
