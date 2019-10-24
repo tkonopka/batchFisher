@@ -7,10 +7,11 @@
 #' @param vals vector of integer, values to consider in first three cells in the confusion matrix
 #' @param rotate logical, set TRUE to obtain full table of combinations, leave FALSE
 #' to consider column "d" as the special column that holds constrained counts
+#' @export
 #'
 #' @return data.table with columns (a,b,c,d) that describe entries in a contingency
 #' table and columns (p.value, odds.ratio) that capture output from fisher.test
-precompute_fisher2x2 = function(universe_size, vals=seq(0, 20), rotate=FALSE) {
+precompute_fisher = function(universe_size, vals=seq(0, 20), rotate=FALSE) {
 
   # prepare a table of all configurations
   vals = unique(pmin(universe_size, pmax(vals, 0)))
@@ -46,6 +47,7 @@ precompute_fisher2x2 = function(universe_size, vals=seq(0, 20), rotate=FALSE) {
 #' This creates configurations that are expected to have the same properties under
 #' fisher.test.
 #'
+#' @keywords internal
 #' @param x data table with columns a,b,c,d
 #'
 #' @return data table with same structure as x, but columns a,b,c,d rotated

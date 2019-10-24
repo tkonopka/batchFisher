@@ -45,6 +45,7 @@ batch_fisher = function(data, precomputed=NULL) {
   result = merge(result, relevant, by=count_columns, all.x=TRUE)
   result = result[order(.index)]
   result$.index = NULL
+  setcolorder(result, colnames(data))
   result
 }
 

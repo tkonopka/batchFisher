@@ -115,7 +115,7 @@ This strategy can in-principle provide performance gains when several tasks yiel
 In many cases, sets are rather small, so we can precompute results for some contingency tables that are bound to appear quite often. Here, let's compute results for tables for which three of the four entries are small.
 
 ```{r precomp.40, cache=TRUE}
-precomp.40 = precompute_fisher2x2(length(all_items), vals=0:40)
+precomp.40 = precompute_fisher(length(all_items), vals=0:40)
 head(precomp.40, 3)
 ```
 
@@ -196,11 +196,11 @@ for (i in implementations) {
 legend("right", implementation.labels[implementations], col=colors[implementations])
 ```
 
-Apart from glitches, all approaches show running time that increases linearly with the number of tests, `n`. The slopes of trend lines differ substantially, and at `n=5000` the speedup of the implementation with precomputation over the simple implementation is `r round(perf[n==5000]$simple/perf[n==5000]$precomp, 1)`. For larger `n`, the speedup would be even larger. 
+Apart from glitches, all approaches show running time that increases linearly with the number of tests, `n`. The slopes of trend lines differ substantially, and at `n=5000` the speedup of the implementation with precomputation over the simple implementation is `r round(perf[n==5000]$simple/perf[n==5000]$precomp, 1)`. 
 
 The second diagram shows operations per second. This calculation rate is constant for the simple approach, but increases somewhat for the other methods. This is because as more tests are performed, there is more chance of seeing duplicate configurations.
 
-(This summary hides the fact that the implementation using implementation does in fact require the precomputed values. The time for that precomputation can be nontrivial, but it is on the order of seconds or minutes, so it is a reasonable one-time expenditure). 
+(This summary hides the fact that the implementation using prcomputation does in fact require performing work that is not captured in the running times shown. That preparation can be nontrivial, but it is on the order of seconds or minutes, so it is a reasonable one-time expenditure). 
 
 
 # Discussion

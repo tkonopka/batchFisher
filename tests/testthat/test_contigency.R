@@ -96,3 +96,30 @@ test_that("batch_contingency can process from named sets", {
   expect_equal(result$count_10, rep(0, length=4))
 })
 
+
+test_that("batch_contingency tracks labels from lists", {
+  result = batch_contingency(letter_sets[1:4], letter_sets[2:5], 100)
+  expect_equal(result$a, names(letter_sets)[1:4])
+  expect_equal(result$b, names(letter_sets)[2:5])
+})
+
+
+test_that("batch_contingency tracks labels from named sets", {
+  anames = names(letter_sets[1:3])
+  bnames = names(letter_sets[5:7])
+  result = batch_contingency(anames, bnames, 100, sets=letter_sets)
+  expect_equal(result$a, anames)
+  expect_equal(result$b, bnames)
+})
+
+
+test_that("batch_contingency tracks labels from set indexes", {
+  anames = names(letter_sets[1:3])
+  bnames = names(letter_sets[5:7])
+  result.ints = batch_contingency(1:3, 5:7, 100, sets=letter_sets)
+  result.names = batch_contingency(anames, bnames, 100, sets=letter_sets)
+  expect_equal(result.ints$count_01, result.names$count_01)
+  expect_equal(result.ints$count_10, result.names$count_10)
+  expect_equal(result.ints$b, 5:7)
+  expect_equal(result.names$b, bnames)
+})

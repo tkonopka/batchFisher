@@ -25,7 +25,7 @@ The above technique exploit properties of the batches to avoid repetition, while
 
 An example calculation is presented in the vignette. The summary graph shows performance as a function of batch size (number of tests performed). 
 
-<img src="https://github.com/tkonopka/batchFisher/blob/master/images/readme_simulation.png?raw=true" alt="Running times and operations per second" width="420px"></img>
+<img src="https://github.com/tkonopka/batchFisher/blob/master/images/readme_simulation.png?raw=true" alt="Running times and operations per second"></img>
 
 The two methods provided by package `batchFisher` are denoted as 'batch' and 'batch with precomp.`. They differ by whether or not they use a table or precalculated results. These methods are compared against a third approach denoted as 'simple', which computes one test at a time. 
 

@@ -16,3 +16,4 @@ data table with same structure as x, but columns a,b,c,d rotated
 This creates configurations that are expected to have the same properties under
 fisher.test.
 }
+\keyword{internal}

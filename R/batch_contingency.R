@@ -46,6 +46,7 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
   
   universe_size = rep(universe_size, length.out=n)
   
+  # compute the contingency tables
   result = base::vector("list", n)
   if (is.list(a) & is.list(b)) {
     # all configurations are provided explicitly
@@ -60,9 +61,21 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
       result[[i]] = contingency_vector(aset, bset, universe_size[i])
     }
   }
-  
+  # put into one large table - this relies on rbind preserving the order of a and b
   result = data.table(do.call(rbind, result))
-  colnames(result) = c("count_11", "count_10", "count_01", "count_00")
+  count.cols = c("count_11", "count_10", "count_01", "count_00")
+  colnames(result) = count.cols
+
+  # add annotations to keep track of which contingency tables belong to which inputs
+  if (is.list(a) & is.list(b)) {
+    result$a = names(a)
+    result$b = names(b)
+  } else {
+    result$a = a
+    result$b = b
+  }
+  setcolorder(result, intersect(c("a", "b", count.cols), colnames(result)))
+  
   result
 }
 

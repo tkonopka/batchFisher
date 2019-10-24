@@ -3,3 +3,4 @@
 export(batch_contingency)
 export(batch_fisher)
 export(contingency_vector)
+export(precompute_fisher)
