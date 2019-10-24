@@ -66,18 +66,27 @@ test_that("contingency vec counts with off-by-one (character)", {
 
 
 test_that("batch_contingency requires equal length a, b", {
-  expect_error(batch_contingency(1:4, 1:6, 10, sets=letter_sets))
+  expect_error(batch_contingency(1:4, 1:6, 10, sets=letter_sets),
+               "incompatible")
 })
 
 
 test_that("batch_contingency requires same types of inputs for a and b", {
-  expect_error(batch_contingency(1:4, LETTERS[1:4], 10, sets=letter_sets))
+  expect_error(batch_contingency(1:4, LETTERS[1:4], 10, sets=letter_sets),
+               "incompatible")
 })
 
 
 test_that("batch_contingency requires lists or characters", {
   bad.input = matrix(0, ncol=2, nrow=2)
-  expect_error(batch_contingency(bad.input, bad.input, 10, sets=letter_sets))
+  expect_error(batch_contingency(bad.input, bad.input, 10, sets=letter_sets),
+               "invalid inputs")
+})
+
+
+test_that("batch_contingency detects missing sets", {
+  expect_error(batch_contingency(1:4, 1:4, 10),
+               "insufficient")
 })
 
 

@@ -6,17 +6,17 @@
 
 #' summarize overlap of two sets
 #'
-#' @param a vector, a set of elemnts, can be 'numeric' or 'character'
+#' @param a vector, a set of elements, can be 'numeric' or 'character'
 #' @param b vector, a set of elements, can be 'numeric' or 'character'
 #' @param universe_size integer, total number of elements 
 #' @export
 #'
-#' @return vector with four components (num_common, num_unique_a, num_unique_b, num_others)
+#' @return vector with four components (count_11, count_10, count_01, count_00)
 contingency_vector = function(a, b, universe_size) {
   common = sum(a %in% b)
-  a_only = sum(!(a %in% b))
-  b_only = sum(!(b %in% a))
-  c(common, a_only, b_only, universe_size-common-a_only-b_only)
+  a_only = length(a) - common
+  b_only = length(b) - common
+  c(common, a_only, b_only, universe_size - common - a_only - b_only)
 }
 
 
@@ -43,26 +43,28 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
   if (!class(a) %in% c("list", "character", "integer")) {
     stop("invalid inputs - must be in form of list or character/integer vectors\n")
   }
+  if (!is.list(a) & !is.list(sets)) {
+    stop("insufficient information - sets must be specified if a, b are vectors\n")
+  }
   
   universe_size = rep(universe_size, length.out=n)
   
   # compute the contingency tables
-  result = base::vector("list", n)
+  result = matrix(0, ncol=n, nrow=4)
   if (is.list(a) & is.list(b)) {
     # all configurations are provided explicitly
     for (i in seq_len(n)) {
-      result[[i]] = contingency_vector(a[[i]], b[[i]], universe_size[i])
+      result[, i] = contingency_vector(a[[i]], b[[i]], universe_size[i])
     }
   } else {
     # configuration are provided through sets
     for (i in seq_len(n)) {
       aset = sets[[a[i]]]
       bset = sets[[b[i]]]
-      result[[i]] = contingency_vector(aset, bset, universe_size[i])
+      result[, i] = contingency_vector(aset, bset, universe_size[i])
     }
   }
-  # put into one large table - this relies on rbind preserving the order of a and b
-  result = data.table(do.call(rbind, result))
+  result = data.table(t(result))
   count.cols = c("count_11", "count_10", "count_01", "count_00")
   colnames(result) = count.cols
 
@@ -78,5 +80,4 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
   
   result
 }
-
 

@@ -7,14 +7,14 @@
 contingency_vector(a, b, universe_size)
 }
 \arguments{
-\item{a}{vector, a set of elemnts, can be 'numeric' or 'character'}
+\item{a}{vector, a set of elements, can be 'numeric' or 'character'}
 
 \item{b}{vector, a set of elements, can be 'numeric' or 'character'}
 
 \item{universe_size}{integer, total number of elements}
 }
 \value{
-vector with four components (num_common, num_unique_a, num_unique_b, num_others)
+vector with four components (count_11, count_10, count_01, count_00)
 }
 \description{
 summarize overlap of two sets
