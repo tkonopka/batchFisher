@@ -84,8 +84,14 @@ test_that("batch_contingency requires lists or characters", {
 
 
 test_that("batch_contingency detects missing sets", {
+  # when a/b are vectors, sets must be supplied
   expect_error(batch_contingency(1:4, 1:4, 10),
                "insufficient")
+})
+
+
+test_that("batch_contingency does not accept empty ", {
+  expect_error(batch_contingency(c(), c(), 100, sets=letter_sets), "invalid")
 })
 
 
@@ -130,5 +136,45 @@ test_that("batch_contingency tracks labels from set indexes", {
   expect_equal(result.ints$count_10, result.names$count_10)
   expect_equal(result.ints$b, 5:7)
   expect_equal(result.names$b, bnames)
+})
+
+
+test_that("batch contingency provides answers in same order as inputs (a sorting)", {
+  # define a series where some indexes in ** a ** are repeated
+  a.indexes = as.integer(c(2,4,2,2,5))
+  b.indexes = as.integer(c(1,2,3,4,5))
+  asets = letter_sets[a.indexes]
+  bsets = letter_sets[b.indexes]
+  u = c(100, 120, 100, 120, 100)
+  result.ints = batch_contingency(a.indexes, b.indexes, u, sets=letter_sets)
+  result.sets = batch_contingency(asets, bsets, u)
+  # the counts must be the same
+  # (this is nontrivial because the batch_contingency with indexes does not
+  # perform the calculations in order. So it is important that it outputs
+  # the results as they are intended)
+  expect_equal(result.ints$count_11, result.sets$count_11)
+  expect_equal(result.ints$count_00, result.sets$count_00)
+  expect_equal(result.ints$count_01, result.sets$count_01)
+  expect_equal(result.ints$count_10, result.sets$count_10)
+})
+
+
+test_that("batch contingency provides answers in same order as inputs (b sorting)", {
+  # define a series where some indexes in ** b ** are repeated
+  a.indexes = as.integer(c(1,2,3,4,5))
+  b.indexes = as.integer(c(2,1,8,2,8))
+  asets = letter_sets[a.indexes]
+  bsets = letter_sets[b.indexes]
+  u = c(100, 120, 110, 120, 130)
+  result.ints = batch_contingency(a.indexes, b.indexes, u, sets=letter_sets)
+  result.sets = batch_contingency(asets, bsets, u)
+  # the counts must be the same
+  # (this is nontrivial because the batch_contingency with indexes does not
+  # perform the calculations in order. So it is important that it outputs
+  # the results as they are intended)
+  expect_equal(result.ints$count_11, result.sets$count_11)
+  expect_equal(result.ints$count_00, result.sets$count_00)
+  expect_equal(result.ints$count_01, result.sets$count_01)
+  expect_equal(result.ints$count_10, result.sets$count_10)
 })
 

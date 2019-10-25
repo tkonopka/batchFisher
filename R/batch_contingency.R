@@ -38,6 +38,88 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
   if (n != length(b)) {
     stop("incompatible components 'a' and 'b' - must be of equal length\n")
   }
+  if (!identical(class(a), class(b))) {
+    stop("incompatible components 'a' and 'b' - must of the same class\n")
+  }
+  if (!(class(a) %in% c("list", "character", "integer"))) {
+    stop("invalid inputs - must be in form of list or character/integer vectors\n")
+  }
+  if (!is.list(a) & !is.list(sets)) {
+    stop("insufficient information - sets must be specified if a, b are vectors\n")
+  }
+  
+  universe_size = rep(universe_size, length.out=n)
+  
+  # compute the contingency tables
+  result = matrix(0, ncol=n, nrow=4)
+  if (is.list(a) & is.list(b)) {
+    # all configurations are provided explicitly
+    for (i in seq_len(n)) {
+      result[, i] = contingency_vector(a[[i]], b[[i]], universe_size[i])
+    }
+  } else {
+    # configuration are provided through sets
+    # perform the calculations in an advantageous order
+    ab.swap = (length(unique(b)) < length(unique(a)))
+    if (ab.swap) {
+      temp = b
+      b = a
+      a = temp
+    }
+    fwd.order = order(a)
+    rev.order = rank(a, ties="first")
+    a = a[fwd.order]
+    b = b[fwd.order]
+    u = universe_size[fwd.order]
+    # loop and use relevant sets on each round, but avoid lookup when not necessary
+    anew = !duplicated(a)
+    for (i in seq_len(n)) {
+      if (anew[i]) {
+        aset = sets[[a[i]]]
+      }
+      bset = sets[[b[i]]]
+      result[, i] = contingency_vector(aset, bset, u[i])
+    }
+    result = result[, rev.order]
+    a = a[rev.order]
+    b = b[rev.order]
+    if (ab.swap) {
+      # swap the names
+      temp = b
+      b = a
+      a = temp
+      # swap the count_01 and count_10
+      temp = result[2,]
+      result[2,] = result[3,]
+      result[3,] = temp
+    }
+  }
+  result = data.table(t(result))
+  count.cols = c("count_11", "count_10", "count_01", "count_00")
+  colnames(result) = count.cols
+
+  # add annotations to keep track of which contingency tables belong to which inputs
+  if (is.list(a) & is.list(b)) {
+    result$a = names(a)
+    result$b = names(b)
+  } else {
+    result$a = a
+    result$b = b
+  }
+  setcolorder(result, intersect(c("a", "b", count.cols), colnames(result)))
+  
+  result
+}
+
+
+
+
+batch_contingency_working = function(a, b, universe_size, sets=NULL) {
+  
+  n = length(a)
+  if (n != length(b)) {
+    stop("incompatible components 'a' and 'b' - must be of equal length\n")
+  }
   if (class(a) != class(b)) {
     stop("incompatible components 'a' and 'b' - must of the same class\n")
   }
@@ -78,7 +160,6 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
     result$b = b
   }
   setcolorder(result, intersect(c("a", "b", count.cols), colnames(result)))
-  
   result
 }
 
