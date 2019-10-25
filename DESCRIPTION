@@ -1,16 +1,20 @@
 Package: batchFisher
-Title: Fast computation of Fisher p-values for 2x2 contingency tables
+Title: Fast computation of batches of Fisher p-values
 Version: 0.1.0
 Author: Tomasz Konopka
 Maintainer: Tomasz Konopka <t.konopka@qmul.ac.uk>
-Description: Fast computation
+Description: Fisher p-values are routinely used to compare sets. In situations when many
+	     comparisons are performed in a systematic manner, the calculation of p-values
+	     can be a bottleneck. The package provides convenience functions that
+	     streamline such batch calculations.
 Depends:
 	R (>= 3.5),
 	data.table (>= 1.12)
 Imports:
-        data.table (>= 1.12),
+	stats
 Encoding: UTF-8
 LazyData: true
+License: BSD_3_clause + file LICENSE
 RoxygenNote: 6.1.1
 Suggests:
 	knitr,

@@ -28,6 +28,7 @@ contingency_vector = function(a, b, universe_size) {
 #' if a simple vector, each component is interpreted as an index into 'sets'
 #' @param sets list with vectors, used when 'a' or 'b' are not lists
 #' @param universe_size integer, the total number of elements that sets a, b were drawn from
+#' @import data.table
 #' @export
 #'
 #' @return data table with one row per item, column id and a,b,c,d

@@ -7,7 +7,7 @@
 precompute_fisher_contingency(x)
 }
 \arguments{
-\item{x}{data table with columns count_11, count_10, count_01, count_00}
+\item{x}{data table with count columns (count_11, count_10, count_01, count_00)}
 }
 \value{
 a table with the contingency values, and new columns with p.value and odds.ratio

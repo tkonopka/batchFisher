@@ -34,8 +34,9 @@ test_that("precompute can limit configuration by odds-ratio", {
   expect_true(nrow(result.or)<nrow(result.all))
 })
 
+
 test_that("precompute takes different ranges for a and b values", {
-  result = precompute_fisher(50, a_vals=c(0,1,2,3), b_vals=c(0,1))
+  result = precompute_fisher(50, a_sizes=c(0,1,2,3), b_sizes=c(0,1))
   expect_equal(sort(unique(result$count_11)), c(0,1))
   # a values should be between 0 and 3
   expect_equal(sort(unique(result$count_10)), c(0,1,2,3))
@@ -49,6 +50,12 @@ test_that("precompute takes different ranges for a and b values", {
 
 
 # calculation of fisher values from configurations
+
+test_that("precomputing from contingency table checks structure", {
+  conf0 = data.table(count_11=4, count_10=2, count_01=3)
+  expect_error(precompute_fisher_contingency(conf0), "missing count")
+})
+
 
 test_that("precomputing from contingency table works with single configuration", {
   conf1 = data.table(count_11=4, count_10=2, count_01=3, count_00=30)

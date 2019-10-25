@@ -6,13 +6,13 @@
 #'
 #' @param data data.table with contingency values as output by batchContingency
 #' @param precomputed data table with precomputed p-values and odds-ratios
+#' @import data.table
 #' @export
 #'
 #' @return data table with contingency data and fisher output for each item in data
 batch_fisher = function(data, precomputed=NULL) {
 
   count_columns = paste0("count_", c("11", "10", "01", "00"))
-
   if (!all(count_columns %in% colnames(data))) {
     stop("input data object has missing count columns\n")
   }

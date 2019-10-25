@@ -4,15 +4,15 @@
 \alias{precompute_fisher}
 \title{precompute fisher p-values and odds ratios}
 \usage{
-precompute_fisher(universe_size, a_vals = seq(0, universe_size),
-  b_vals = a_vals, max_or = NULL)
+precompute_fisher(universe_size, a_sizes = seq(0, universe_size),
+  b_sizes = a_sizes, max_or = NULL)
 }
 \arguments{
 \item{universe_size}{integer, large number}
 
-\item{a_vals}{vector of integers, values to consider for sizes of set a}
+\item{a_sizes}{vector of integers, values to consider for sizes of set a}
 
-\item{b_vals}{vector of integers, values to consider for szies of set b}
+\item{b_sizes}{vector of integers, values to consider for szies of set b}
 
 \item{max_or}{numeric, maximal population odds-ratio;
 When max_or is NULL, the precomputed configurations contain all scenarios
@@ -24,6 +24,8 @@ data.table with columns (a,b,c,d) that describe entries in a contingency
 table and columns (p.value, odds.ratio) that capture output from fisher.test
 }
 \description{
-Nomenclature: set a is compared against set b, the contingency matrix is
-composed of count_11, count_10, count_01, and count_00
+Imagine that two sets a and b are composed of items from some superset.
+These sets are compared, which leads to a contingency table with components
+count_11, count_10, count_01, and count_00. The contingency table can be
+processed using a fisher test to obtain a p-value and an odds-ratio.
 }
