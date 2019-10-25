@@ -17,7 +17,7 @@ body {
 </style>
 
 
-The Fisher exact test is a common approach to compare two sets and R provides a straightforward way to perform this test via the `fisher.test` function. However, systematic analyses that deal with many sets evaluate the `fisher.test` many times, i.e. in batch. The `batchFisher` package provides mechanisms for optimizing such batch calculations.
+The Fisher exact test is a common approach to compare two sets and R provides a straightforward way to perform this test via the `fisher.test` function. However, systematic analyses that deal with many sets evaluate the `fisher.test` many times, i.e. in batch. The `batchFisher` package optimizes such batch calculations.
 
 The package can be installed through github. Once installed, it can be loaded in the usual manner.
 
@@ -36,6 +36,7 @@ Let's make a simulation using some synthetic data. Let's imagine there are 1000 
 set.seed(1234)
 all_items = 1:1000
 random_sets = lapply(1:1000, function(x) {
+  # sampling is from the first 500 items - so random sets with a clear bias
   sort(sample(all_items[1:500], rpois(1, 20)))
 })
 names(random_sets) = paste0("set_", seq_along(random_sets))
@@ -46,16 +47,18 @@ We can preview a couple of these sets
 random_sets[1:2]
 ```
 
-For the analysis of this collection, we are interested in testing pairs of these sets using a FIsher test. The motivation can depend on the context, of course. Here, let's just assume that we have a certain number of tasks to perform.
+The analysis of this collection might involve comparing pairs of these sets - perhaps all pairs - using the Fisher test. The motivation and interpretation of these tests in a real-world application will depend on the context. Here, let's just assume that we have a certain number of tasks to perform.
 
 ```{r tasks, cache=TRUE}
 num.tasks = 5000
 all.tasks = data.table(a=sample(names(random_sets), num.tasks, replace=TRUE),
                        b=sample(names(random_sets), num.tasks, replace=TRUE))
-head(all.tasks)
+some.tasks = head(all.tasks)
+some.tasks
 ```
 
-Each of the tasks - a row in the `all.tasks` table - is to compare two of the named sets. A systematic comparison of all pairs would consist of 1000*999/2 tests. Here, the tasks list is capped at just 5000.
+Each of the tasks - a row in the `all.tasks` table - involves two specified sets. The number of tasks is capped at just 5000 as that is sufficient for this simulation. The other table `some.tasks` is a convenience; we will use it to check the code below.
+
 
 
 
@@ -79,18 +82,18 @@ process_simple = function(tasks) {
 }
 ```
 
-(This implementation uses a helper function, `contingency_vector`, from the `batchFisher` package. It compares two sets and produces values that can be placed into a contingency table. While this function is from the `batchFisher` package, it has a very simple implementation).
+(This implementation uses a helper function, `contingency_vector`, from the `batchFisher` package. It compares two sets and produces values that can be placed into a contingency table. While this function is from the `batchFisher` package, it has a very simple implementation.)
 
-To see how this work, let's evaluate this on a subset
+To see how this work, we can use this function to evaluate some of the tasks.
 
 ```{r}
-process_simple(all.tasks[1:4,])
+process_simple(some.tasks)
 ```
 
 
 ## Batch computation
 
-The `batchFisher` package provides alternate implementations. One of these is to collect contingency matrices for all comparisons, and then compute the p-values in a distinct second step. 
+The `batchFisher` package provides alternate implementations. One of these involves collecting many contingency matrices, and then computing p-values in a distinct second step. 
 
 ```{r process.batch}
 process_batch = function(tasks) {
@@ -101,27 +104,25 @@ process_batch = function(tasks) {
 }
 ```
 
-We can check this function works by evaluating a few of the tasks as before.
+We can check this works by evaluating a few of the tasks, as before.
 
 ```{r}
-process_batch(all.tasks[1:4,])
+process_batch(some.tasks)
 ```
 
-This strategy can in-principle provide performance gains when several tasks yield the same contingency matrix. The fisher p-value for that matrix can be computed only once and assigned to all the relevant tasks. 
+While the output is the same as before, this strategy can in-principle provide performance gains when several tasks yield the same contingency matrix. The fisher p-value for that matrix can be computed only once and assigned to all the relevant tasks. 
 
 
 ## Batch computation with precomputation
 
-In many cases, sets are rather small, so we can precompute results for some contingency tables that are bound to appear quite often. Here, let's compute results for tables for which three of the four entries are small.
+In some real-world applications, sets are rather small and several sets may have the same size, so we can precompute results for some contingency tables that are bound to appear quite often. Here, let's compute results for tables that can appear for sets of sizes up to 40. 
 
 ```{r precomp.40, cache=TRUE}
-precomp.40 = precompute_fisher(length(all_items), 0:40)
+precomp.40 = precompute_fisher(length(all_items), 0:40, max_or=30)
 head(precomp.40, 3)
 ```
 
-The table contains all configurations with the first three entries are smaller or equal to 40.
-
-We can now define a new procedure to perform our tasks by using this resource.
+The table contains configurations with the first three entries are smaller or equal to 40. We can now define a new procedure to perform our tasks by using this resource.
 
 ```{r process.precomputed}
 process_batch_precomp = function(tasks, precomputed) {
@@ -135,16 +136,16 @@ process_batch_precomp = function(tasks, precomputed) {
 We can check this generates the same output as before.
 
 ```{r}
-process_batch_precomp(all.tasks[1:4,], precomp.40)
+process_batch_precomp(some.tasks, precomp.40)
 ```
 
-In terms of implementation, this is almost the same as the previous function, but there is an additional argument. The advantage of this approach is that the precomputed values can be re-used many times. This is particularly useful when calculations consist many similar batches.
+In terms of implementation, this is almost the same as `process_batch`, but there is an additional argument. The advantage of this approach is that the precomputed values can be re-used many times. This is particularly useful when calculations consist many similar batches.
 
 
 
 # Performance
 
-We can now measure performance of the three implementations. When there is only a single task to perform, it should be obvious that the best approach will be to use `fisher.test` just like in the first approach above; any additional processing is superfluous. But when there are many similar tasks, the other approaches may provide benefits. Let's measure the running time as function of the number of tasks.
+We can now measure performance of the three implementations. When there is only a single task to perform, it should be obvious that the best approach will be to use a single `fisher.test` just like in the first approach above; any additional processing is superfluous. But when there are many similar tasks, the other approaches may provide benefits. Let's measure the running time as a function of the number of tasks.
 
 ```{r performance, cache=TRUE}
 perf = data.table(n=c(1, seq(100, num.tasks, by=100)),
@@ -152,8 +153,8 @@ perf = data.table(n=c(1, seq(100, num.tasks, by=100)),
 elapsed = function(...) { system.time(...)["elapsed"] }
 for (i in seq_along(perf$n)) {
   i.tasks = all.tasks[1:perf$n[i]]
-  perf$simple[i] = elapsed(process_simple(i.tasks))
-  perf$batch[i] = elapsed(process_batch(i.tasks))
+  perf$simple[i]  = elapsed(process_simple(i.tasks))
+  perf$batch[i]   = elapsed(process_batch(i.tasks))
   perf$precomp[i] = elapsed(process_batch_precomp(i.tasks, precomp.40))
 }
 ```
@@ -196,16 +197,18 @@ for (i in implementations) {
 legend("right", implementation.labels[implementations], col=colors[implementations])
 ```
 
-Apart from glitches, all approaches show running time that increases linearly with the number of tests, `n`. The slopes of trend lines differ substantially, and at `n=5000` the speedup of the implementation with precomputation over the simple implementation is `r round(perf[n==5000]$simple/perf[n==5000]$precomp, 1)`. 
+Apart from glitches, all approaches show running time that increases with the number of tests in the batch. But the slopes of trend lines differ substantially. For large batch sizes in this simulation, the speedup of the implementation with precomputation over the simple implementation is `r round(perf[n==5000]$simple/perf[n==5000]$precomp, 1)`. 
 
-The second diagram shows operations per second. This calculation rate is constant for the simple approach, but increases somewhat for the other methods. This is because as more tests are performed, there is more chance of seeing duplicate configurations.
+The second diagram shows operations per second. This calculation rate is constant for the simple approach, but increases for the other methods with the batch size. This is because as more tests are performed, there is more chance of seeing duplicate configurations.
 
-(This summary hides the fact that the implementation using prcomputation does in fact require performing work that is not captured in the running times shown. That preparation can be nontrivial, but it is on the order of seconds or minutes, so it is a reasonable one-time expenditure). 
+(The graphical summary hides the fact that the approach involving prcomputation requires performing work before the performance-measuring loop. That preparation time can be substantial, but the expenditure can be worthwhile when there are many tasks to process and the precomputed values can be re-used many times.)
 
 
 # Discussion
 
-The `batchFisher` package provides convenience functions for evaluating batches of Fisher tests. In certain situations of practical interest, using these convenience functions can offer substantial speedup over performing many tests one-at-a-time. All these implementation are thread-safe, meaning that they can be used inside constructs such as `mclapply`. 
+The `batchFisher` package provides convenience functions for evaluating batches of Fisher tests. In certain situations of practical interest, using these convenience functions can offer substantial speedup over performing tests one-at-a-time.
+
+All functions in the package are thread-safe; they can be used inside constructs such as `mclapply`. 
 
 
 

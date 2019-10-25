@@ -10,7 +10,7 @@ if (!exists("letter_sets")) {
 
 
 
-# tests for contingency vectors
+# calculation of contingency vectors
 
 test_that("contingency vec works with an empty set (character)", {
   result.a = contingency_vector(letters[1:3], c(), 40)
@@ -62,8 +62,7 @@ test_that("contingency vec counts with off-by-one (character)", {
 
 
 
-# tests for batch contingency tables
-
+# batch contingency tables
 
 test_that("batch_contingency requires equal length a, b", {
   expect_error(batch_contingency(1:4, 1:6, 10, sets=letter_sets),
@@ -132,3 +131,4 @@ test_that("batch_contingency tracks labels from set indexes", {
   expect_equal(result.ints$b, 5:7)
   expect_equal(result.names$b, bnames)
 })
+

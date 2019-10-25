@@ -36,7 +36,7 @@ batch_fisher = function(data, precomputed=NULL) {
   }
   
   if (nrow(missing)>0) {
-    newcomputed = fisher2x2(missing)
+    newcomputed = precompute_fisher_contingency(missing)
     relevant = rbind(relevant, newcomputed)
   }
 
@@ -46,30 +46,6 @@ batch_fisher = function(data, precomputed=NULL) {
   result = result[order(.index)]
   result$.index = NULL
   setcolorder(result, colnames(data))
-  result
-}
-
-
-
-
-#' compute fisher p-values and odds-ratios from a table of contingency values
-#'
-#' @keywords internal
-#' @param x data table with column $a, $b, $c $d
-#'
-#' @return an augmented data table with $p.value and $odds.ratio
-fisher2x2 = function(x) {  
-  p.values = rep(1.0, nrow(x))
-  odds.ratios = rep(1.0, nrow(x))
-  xt = t(as.matrix(x[, c("count_11", "count_10", "count_01", "count_00")]))
-  for (i in 1:ncol(xt)) {
-    ff = fisher.test(matrix(xt[,i], nrow=2))
-    p.values[i] = ff$p.value
-    odds.ratios[i] = as.numeric(ff$estimate)
-  }
-  result = data.table(t(xt))
-  result$p.value = p.values
-  result$odds.ratio = odds.ratios
   result
 }
 
