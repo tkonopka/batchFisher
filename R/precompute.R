@@ -27,12 +27,12 @@ precompute_fisher = function(universe_size,
   # prepare a table of all configurations
   a_sizes = unique(pmin(universe_size, pmax(a_sizes, 0)))
   b_sizes = unique(pmin(universe_size, pmax(b_sizes, 0)))
-  ab_sizes = unique(c(a_sizes, b_sizes))
-  pairs = expand.grid(list(x=ab_sizes, y=ab_sizes))
-  pairs = split(pairs, seq_len(nrow(pairs)))
-  configs = rbindlist(lapply(pairs, function(z) {
-    x = z$x
-    y = z$y
+  pairs = t(as.matrix(expand.grid(list(x=a_sizes, y=b_sizes))))
+  configs = vector("list", ncol(pairs))
+  for (i in seq_len(ncol(pairs))) {
+    xy = pairs[,i]
+    x = xy[1]
+    y = xy[2]
     # find the maximal overlap between the sets
     if (is.null(max_or)) {
       # consider all possible overlaps
@@ -46,18 +46,27 @@ precompute_fisher = function(universe_size,
       solutions = (-bb + c(1, -1)* sqrt(bb*bb - 4*aa*cc))/(2*aa)
       solution = ceiling(solutions[solutions <= min(x, y)])
     }
-    data.table(count_11=seq(0, solution),
-               count_10=x-seq(0, solution),
-               count_01=y-seq(0, solution))
-  }))
+    configs[[i]] = data.table(count_11=seq(0, solution),
+                              count_10=x-seq(0, solution),
+                              count_01=y-seq(0, solution))
+  }
+  configs = rbindlist(configs)
   configs$count_00 = universe_size - (configs$count_11 + configs$count_01 + configs$count_10)
-  # consider only positive entries,
-  # Also pick to compute only when count_10 > count_01 (will symmetrize later)
-  configs = configs[count_00 >= 0 & count_10 >= count_01]
+  # consider only positive entries
+  configs = configs[count_00 >= 0]
+  
+  # To avoid computing fisher tests two times for symmetrical situations
+  # find out which of the items must be computed and which ones are duplicated
+  swapped = configs[count_10 > count_01]
+  swapped[, c("count_01", "count_10") := list(count_10, count_01)]
+  swapped$swapped = 1
+  configs = merge(configs, swapped, by=colnames(configs), all.x=TRUE)
+  configs = configs[is.na(swapped)]
+  configs$swapped = NULL
   
   # brute-force compute fisher outputs, then symmetrize
   result = precompute_fisher_contingency(configs)
-  other = copy(result[count_10 > count_01])
+  other = result[count_10 > count_01]
   other[, c("count_01", "count_10") := list(count_10, count_01)]
   result = rbind(result, other)
   result = result[(count_11 + count_10) %in% a_sizes]
