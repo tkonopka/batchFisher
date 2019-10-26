@@ -11,7 +11,7 @@ The package uses the following optimization strategies:
 
  - Large batches of set comparisons can contain several instances described by the same contingency matrices. The package can identify the unique configurations and perform the p-value and odds-ratios calculation fewer times.
  - Calculations that handle several batches can encounter the same contingency matrices in distinct batches. The package provides a mechanism to precompute outputs for certain configuration and then re-use the results when appropriate.
- - Batches can include comparisons of a single set against many others. In this case, the repeated set can be re-used in many cases instead of fetching it anew each time.
+ - Batches can include comparisons of one set against many others. The repeated set can be re-used for many comparisons instead of fetching it anew every time.
  - Calculations that begin with sets must compute contingency matrices before evaluating the Fisher test. Out of several possible implementations (including Rcpp), the package uses an implementation in base R that works well for sets of moderate size.
 
 

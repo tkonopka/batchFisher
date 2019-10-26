@@ -20,11 +20,11 @@ test_that("precompute produces a small table with p-values and odds.ratios", {
 
 
 test_that("precompute makes all combinations", {
-  result = precompute_fisher(50, c(0,1))
-  expect_equal(sort(unique(result$count_11)), 0:1)
-  expect_equal(sort(unique(result$count_10)), 0:1)
-  expect_equal(sort(unique(result$count_01)), 0:1)
-  expect_equal(sort(unique(result$count_00)), 48:50)
+  result = precompute_fisher(50, c(0,1,2))
+  expect_equal(sort(unique(result$count_11)), 0:2)
+  expect_equal(sort(unique(result$count_10)), 0:2)
+  expect_equal(sort(unique(result$count_01)), 0:2)
+  expect_equal(sort(unique(result$count_00)), 46:50)
 })
 
 
@@ -40,10 +40,26 @@ test_that("precompute takes different ranges for a and b values", {
   expect_equal(sort(unique(result$count_11)), c(0,1))
   # a values should be between 0 and 3
   expect_equal(sort(unique(result$count_10)), c(0,1,2,3))
-  # b values were specified as 0,1 - but the output is symmetrized
-  expect_equal(sort(unique(result$count_01)), c(0,1,2,3))
+  # b values were specified as 0,1
+  expect_equal(sort(unique(result$count_01)), c(0,1))
   # some combinations will not occur because of the a_vals and b_vals ranges
   expect_equal(nrow(result[count_01==3 & count_10==3]), 0)
+})
+
+
+test_that("precompute is invariant to switching a and b (all configurations)", {
+  result.1 = precompute_fisher(800, 0:4, 0:2)
+  result.2 = precompute_fisher(800, 0:2, 0:4)
+  # the sizes should be the same (content wise they are count_01 <-> count_10
+  expect_equal(dim(result.1), dim(result.2))
+})
+
+
+test_that("precompute is invariant to switching a and b (capped by odds-ratio)", {
+  result.1 = precompute_fisher(800, 0:8, 0:4, max_or=10)
+  result.2 = precompute_fisher(800, 0:4, 0:8, max_or=10)
+  # the sizes should be the same (content wise they are count_01 <-> count_10
+  expect_equal(dim(result.1), dim(result.2))
 })
 
 

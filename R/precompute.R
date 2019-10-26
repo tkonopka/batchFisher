@@ -27,44 +27,41 @@ precompute_fisher = function(universe_size,
   # prepare a table of all configurations
   a_sizes = unique(pmin(universe_size, pmax(a_sizes, 0)))
   b_sizes = unique(pmin(universe_size, pmax(b_sizes, 0)))
-  if (is.null(max_or)) {
-    # construct exhaustive set of configurations
-    configs = list(count_11=seq(0, min(max(a_sizes), max(b_sizes))),
-                   count_10=a_sizes,
-                   count_01=b_sizes)
-    configs = data.table(expand.grid(configs))
-    configs = configs[(count_11 + count_10) %in% a_sizes &
-                        (count_11 + count_01) %in% b_sizes, ]
-  } else {
-    # consider pairings of sizes a and b, for each construct a small set
-    configs = expand.grid(list(count_10=a_sizes, count_01=b_sizes))
-    configs = split(configs, seq_len(nrow(configs)))
-    configs = rbindlist(lapply(configs, function(x) {
-      # for a given size of set a and set b, compute the maximal overlap
-      # that provides an odds-ratio of max_or
-      # This calculation gives a quadratic formula with the following coefficients
-      aa = max_or-1
-      bb = -universe_size - (x$count_10 + x$count_01)*(max_or-1)
-      cc = max_or * x$count_10 * x$count_01
+  ab_sizes = unique(c(a_sizes, b_sizes))
+  pairs = expand.grid(list(x=ab_sizes, y=ab_sizes))
+  pairs = split(pairs, seq_len(nrow(pairs)))
+  configs = rbindlist(lapply(pairs, function(z) {
+    x = z$x
+    y = z$y
+    # find the maximal overlap between the sets
+    if (is.null(max_or)) {
+      # consider all possible overlaps
+      solution = min(x, y)
+    } else {
+      # capping by odds-ratio
+      # This scenario gives a quadratic equation with the following coefficients
+      aa =  max_or-1
+      bb = -universe_size - (x + y)*(max_or-1)
+      cc = max_or * x * y
       solutions = (-bb + c(1, -1)* sqrt(bb*bb - 4*aa*cc))/(2*aa)
-      solution = ceiling(solutions[solutions <= x$count_01 & solutions <= x$count_10])
-      x.configs = list(count_11=seq(0, solution),
-                       count_10=x$count_10-seq(0, solution),
-                       count_01=x$count_01-seq(0, solution))
-      x.out = data.table(expand.grid(x.configs))
-      x.out[(count_11+count_10) == x$count_10 & (count_11+count_01)==x$count_01]
-    }))
-  }
+      solution = ceiling(solutions[solutions <= min(x, y)])
+    }
+    data.table(count_11=seq(0, solution),
+               count_10=x-seq(0, solution),
+               count_01=y-seq(0, solution))
+  }))
   configs$count_00 = universe_size - (configs$count_11 + configs$count_01 + configs$count_10)
-  # consider only positive entries
-  # also consider only when 10>01 (will symmetrize afterward)
-  configs = unique(configs[count_00 >= 0 & count_10 >= count_01])
+  # consider only positive entries,
+  # Also pick to compute only when count_10 > count_01 (will symmetrize later)
+  configs = configs[count_00 >= 0 & count_10 >= count_01]
   
   # brute-force compute fisher outputs, then symmetrize
   result = precompute_fisher_contingency(configs)
   other = copy(result[count_10 > count_01])
   other[, c("count_01", "count_10") := list(count_10, count_01)]
   result = rbind(result, other)
+  result = result[(count_11 + count_10) %in% a_sizes]
+  result = result[(count_11 + count_01) %in% b_sizes]
   result[order(count_11, count_10, count_01, count_00)]
 }
 
