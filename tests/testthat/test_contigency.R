@@ -95,14 +95,26 @@ test_that("batch_contingency does not accept empty ", {
 })
 
 
-test_that("batch_contingency can process from lists", {
+test_that("batch_contingency can process batch of size 1 (from lists)", {
+  result = batch_contingency(letter_sets[1], letter_sets[2], 100)
+  expect_equal(nrow(result), 1)
+})
+
+
+test_that("batch_contingency can process batch of size 1 (from named sets)", {
+  result = batch_contingency("A", "B", 100, sets=letter_sets)
+  expect_equal(nrow(result), 1)
+})
+
+
+test_that("batch_contingency can process (from lists)", {
   result = batch_contingency(letter_sets[1:4], letter_sets[2:5], 100)
   expect_equal(result$count_11, 1:4)
   expect_equal(result$count_01, rep(1, length=4))
   expect_equal(result$count_10, rep(0, length=4))
 })
 
-test_that("batch_contingency can process from named sets", {
+test_that("batch_contingency can process (from named sets)", {
   setnames = names(letter_sets)
   result = batch_contingency(setnames[1:4], setnames[2:5], 100, sets=letter_sets)
   expect_equal(result$count_11, 1:4)
@@ -111,14 +123,14 @@ test_that("batch_contingency can process from named sets", {
 })
 
 
-test_that("batch_contingency tracks labels from lists", {
+test_that("batch_contingency tracks labels (from lists)", {
   result = batch_contingency(letter_sets[1:4], letter_sets[2:5], 100)
   expect_equal(result$a, names(letter_sets)[1:4])
   expect_equal(result$b, names(letter_sets)[2:5])
 })
 
 
-test_that("batch_contingency tracks labels from named sets", {
+test_that("batch_contingency tracks labels (from named sets)", {
   anames = names(letter_sets[1:3])
   bnames = names(letter_sets[5:7])
   result = batch_contingency(anames, bnames, 100, sets=letter_sets)
@@ -127,7 +139,7 @@ test_that("batch_contingency tracks labels from named sets", {
 })
 
 
-test_that("batch_contingency tracks labels from set indexes", {
+test_that("batch_contingency tracks labels (from set indexes)", {
   anames = names(letter_sets[1:3])
   bnames = names(letter_sets[5:7])
   result.ints = batch_contingency(1:3, 5:7, 100, sets=letter_sets)
@@ -139,10 +151,10 @@ test_that("batch_contingency tracks labels from set indexes", {
 })
 
 
-test_that("batch contingency provides answers in same order as inputs (a sorting)", {
+test_that("batch contingency provides answers in same order as inputs", {
   # define a series where some indexes in ** a ** are repeated
   a.indexes = as.integer(c(2,4,2,2,5))
-  b.indexes = as.integer(c(1,2,3,4,5))
+  b.indexes = as.integer(c(1,2,5,8,4))
   asets = letter_sets[a.indexes]
   bsets = letter_sets[b.indexes]
   u = c(100, 120, 100, 120, 100)
@@ -159,19 +171,14 @@ test_that("batch contingency provides answers in same order as inputs (a sorting
 })
 
 
-test_that("batch contingency provides answers in same order as inputs (b sorting)", {
-  # define a series where some indexes in ** b ** are repeated
-  a.indexes = as.integer(c(1,2,3,4,5))
-  b.indexes = as.integer(c(2,1,8,2,8))
+test_that("batch contingency when all sets are the same", {
+  # define a series where some indexes in ** a ** are repeated
+  a.indexes = as.integer(rep(3, 5))
+  b.indexes = as.integer(c(1,2,8,5,4))
   asets = letter_sets[a.indexes]
   bsets = letter_sets[b.indexes]
-  u = c(100, 120, 110, 120, 130)
-  result.ints = batch_contingency(a.indexes, b.indexes, u, sets=letter_sets)
-  result.sets = batch_contingency(asets, bsets, u)
-  # the counts must be the same
-  # (this is nontrivial because the batch_contingency with indexes does not
-  # perform the calculations in order. So it is important that it outputs
-  # the results as they are intended)
+  result.ints = batch_contingency(a.indexes, b.indexes, 200, sets=letter_sets)
+  result.sets = batch_contingency(asets, bsets, 200)
   expect_equal(result.ints$count_11, result.sets$count_11)
   expect_equal(result.ints$count_00, result.sets$count_00)
   expect_equal(result.ints$count_01, result.sets$count_01)

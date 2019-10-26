@@ -2,7 +2,7 @@
 % Please edit documentation in R/batch_contingency.R
 \name{contingency_vector}
 \alias{contingency_vector}
-\title{summarize overlap of two sets}
+\title{summarize overlap of two sets into a vector that is ready for a contingency matrix}
 \usage{
 contingency_vector(a, b, universe_size)
 }
@@ -17,5 +17,5 @@ contingency_vector(a, b, universe_size)
 vector with four components (count_11, count_10, count_01, count_00)
 }
 \description{
-summarize overlap of two sets
+summarize overlap of two sets into a vector that is ready for a contingency matrix
 }

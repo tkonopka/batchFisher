@@ -29,8 +29,8 @@ test_that("precompute makes all combinations", {
 
 
 test_that("precompute can limit configuration by odds-ratio", {
-  result.all = precompute_fisher(800, 0:6)
-  result.or = precompute_fisher(800, 0:6, max_or=30)
+  result.all = precompute_fisher(800, 0:5)
+  result.or = precompute_fisher(800, 0:5, max_or=20)
   expect_true(nrow(result.or)<nrow(result.all))
 })
 

@@ -7,7 +7,9 @@
 batch_contingency(a, b, universe_size, sets = NULL)
 }
 \arguments{
-\item{a}{sets a; if of type list, each component is interpreted as a set}
+\item{a}{sets a. if of type list, each component is interpreted as a set.
+If a simple vector of characters or integers, interpreted as indexes into
+the list of sets. It is advantageous when many a sets are the same.}
 
 \item{b}{sets b to match a;
 if type list, each component is interpreted as a set;

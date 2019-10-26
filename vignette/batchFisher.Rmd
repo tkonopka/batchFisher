@@ -199,7 +199,7 @@ legend("right", implementation.labels[implementations], col=colors[implementatio
 
 Apart from glitches, all approaches show running time that increases with the number of tests in the batch. But the slopes of trend lines differ substantially. For large batch sizes in this simulation, the speedup of the implementation with precomputation over the simple implementation is `r round(perf[n==5000]$simple/perf[n==5000]$precomp, 1)`. 
 
-The second diagram shows operations per second. This calculation rate is constant for the simple approach, but increases for the other methods with the batch size. This is because as more tests are performed, there is more chance of seeing duplicate configurations.
+The second diagram shows operations per second. This calculation rate is constant for the simple approach, but increases for the other methods with the batch size. This is because as more tests are performed, there is more chance of seeing duplicate configurations. The best rate achieved in this simulation is ~`r signif(max(ops$precomp), 2)` thousand tests per second.
 
 (The graphical summary hides the fact that the approach involving prcomputation requires performing work before the performance-measuring loop. That preparation time can be substantial, but the expenditure can be worthwhile when there are many tasks to process and the precomputed values can be re-used many times.)
 
