@@ -19,6 +19,15 @@ test_that("precompute produces a small table with p-values and odds.ratios", {
 })
 
 
+test_that("precompute gives counts as integers, not numerics", {
+  result = precompute_fisher(50, 0:2)
+  expect_equal(class(result$count_00), "integer")
+  expect_equal(class(result$count_01), "integer")
+  expect_equal(class(result$count_10), "integer")
+  expect_equal(class(result$count_11), "integer")
+})
+
+
 test_that("precompute makes all combinations", {
   result = precompute_fisher(50, c(0,1,2))
   expect_equal(sort(unique(result$count_11)), 0:2)

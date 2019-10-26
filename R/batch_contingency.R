@@ -66,7 +66,7 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
   universe_size = rep(universe_size, length.out=n)
   
   # compute the contingency tables
-  result = matrix(0, ncol=n, nrow=3)
+  result = matrix(as.integer(0), ncol=n, nrow=3)
   if (is.list(a) & is.list(b)) {
     # all configurations are provided explicitly - no shortcuts
     for (i in seq_len(n)) {
@@ -101,7 +101,7 @@ batch_contingency = function(a, b, universe_size, sets=NULL) {
       b = b[rev.order]
     }
   }
-  count_00 = universe_size - colSums(result)
+  count_00 = as.integer(universe_size - colSums(result))
   result = data.table(t(result))
   count.cols = c("count_11", "count_10", "count_01", "count_00")
   colnames(result) = count.cols[1:3]

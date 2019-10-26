@@ -47,11 +47,12 @@ precompute_fisher = function(universe_size,
       solution = ceiling(solutions[solutions <= min(x, y)])
     }
     configs[[i]] = data.table(count_11=seq(0, solution),
-                              count_10=x-seq(0, solution),
-                              count_01=y-seq(0, solution))
+                              count_10=as.integer(x-seq(0, solution)),
+                              count_01=as.integer(y-seq(0, solution)))
   }
   configs = rbindlist(configs)
   configs$count_00 = universe_size - (configs$count_11 + configs$count_01 + configs$count_10)
+  configs$count_00 = as.integer(configs$count_00)
   # consider only positive entries
   configs = configs[count_00 >= 0]
   

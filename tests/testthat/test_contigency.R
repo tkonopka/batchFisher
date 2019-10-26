@@ -107,11 +107,20 @@ test_that("batch_contingency can process batch of size 1 (from named sets)", {
 })
 
 
+test_that("batch_contingency gives counts as integers, not numerics", {
+  result = batch_contingency(letter_sets[1:4], letter_sets[2:5], 100)
+  expect_equal(class(result$count_00), "integer")
+  expect_equal(class(result$count_01), "integer")
+  expect_equal(class(result$count_10), "integer")
+  expect_equal(class(result$count_11), "integer")
+})
+
+
 test_that("batch_contingency can process (from lists)", {
   result = batch_contingency(letter_sets[1:4], letter_sets[2:5], 100)
   expect_equal(result$count_11, 1:4)
   expect_equal(result$count_01, rep(1, length=4))
-  expect_equal(result$count_10, rep(0, length=4))
+  expect_equal(result$count_10, rep(0, length=4))  
 })
 
 test_that("batch_contingency can process (from named sets)", {
